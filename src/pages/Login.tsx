@@ -34,6 +34,28 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-container">
+      <div className="login-brand">
+        <div className="brand-content">
+          <h1 className="brand-title">Welcome Back</h1>
+          <p className="brand-description">
+            Sign in to access your dashboard and manage your account with ease.
+          </p>
+          <div className="brand-features">
+            <div className="feature-item">
+              <span className="feature-icon">🔒</span>
+              <span>Secure Authentication</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">⚡</span>
+              <span>Fast & Reliable</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">🎨</span>
+              <span>Modern Interface</span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="login-card">
         <h1>{isSignup ? 'Sign Up' : 'Login'}</h1>
         <p className="login-subtitle">
