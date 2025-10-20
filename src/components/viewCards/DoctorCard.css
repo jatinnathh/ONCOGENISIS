@@ -1,0 +1,80 @@
+/* Container for the Card (Existing Styles) */
+.doctor-card {
+  /* ... existing styles ... */
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin: 15px;
+  max-width: 320px; 
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Header, Photo, Name, and Detail Styles (Existing Styles) */
+/* ... (Keep all existing styles for .card-header, .doctor-photo, .detail-item, etc.) ... */
+
+/* Ensure the last detail item has no dashed border for clean separation */
+.detail-item {
+  border-bottom: 1px dashed #f0f0f0;
+}
+
+.detail-item.detail-no-border {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+
+/* ------------------------------------------------------------------- */
+/* NEW: Time Slot Styles */
+/* ------------------------------------------------------------------- */
+
+.time-slots-section {
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 15px;
+}
+
+.slots-label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.slots-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Space between time buttons */
+}
+
+.slot-button {
+    background-color: #f0f8ff; /* Very light blue background */
+    color: #007bff;
+    border: 1px solid #b3d9ff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    flex-grow: 1; /* Allows buttons to fill space evenly */
+    min-width: 80px; /* Ensures buttons aren't too small */
+}
+
+.slot-button:hover {
+    background-color: #d1e7ff;
+    color: #0056b3;
+}
+
+/* Style for the selected (or just clicked) slot */
+.slot-button.selected {
+    background-color: #28a745; /* Green for booked/selected */
+    color: white;
+    border-color: #218838;
+    transform: scale(1.05);
+}
+
+.slot-button.selected:hover {
+    background-color: #218838;
+}

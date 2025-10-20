@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from './firebase.ts';
 import type { 
   Doctor, 
   Patient, 

@@ -292,6 +292,28 @@
 /* ------------------------------------------------------------------- */
 /* RESPONSIVE DESIGN */
 /* ------------------------------------------------------------------- */
+
+/* Add this to PatientDashboard.css */
+
+/* Doctor Card List Container */
+/* This ensures the cards break naturally below the content card */
+.doctor-list-card {
+    /* Optional: Remove bottom margin if cards need to sit closer */
+    /* margin-bottom: 0; */
+}
+
+.doctor-list-container-override {
+    /* This overrides the default flow and centers the list of cards */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center; /* Center the cards horizontally */
+    margin-top: 20px;
+}
+
+/* Ensure you have the DoctorCard.css content from the previous response as well! */
+
+
 @media (max-width: 768px) {
   .dashboard-header {
     padding: 15px 20px;

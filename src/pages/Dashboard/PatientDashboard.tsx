@@ -3,6 +3,56 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserProfile } from '../../services/userService';
 import type { Patient } from '../../types';
+
+// --- Doctor Card Imports and Mock Data ---
+import { DoctorList } from '../../components/viewCards/DoctorCard'; 
+
+interface Doctor {
+  id: number;
+  name: string;
+  qualification: string;
+  specialty: string;
+  expertise: string;
+  experienceYears: number;
+  photoUrl: string;
+  availableSlots: string[]; // Crucial for time slots
+}
+
+const MOCK_DOCTORS: Doctor[] = [
+  {
+    id: 101,
+    name: 'Aisha Khan',
+    qualification: 'MD, FRCP (Cardiology)',
+    specialty: 'Cardiology',
+    expertise: 'Interventional Cardiology, ECG',
+    experienceYears: 12,
+    photoUrl: 'https://i.pravatar.cc/150?img=40',
+    availableSlots: ['9:00 - 10:00', '10:00 - 12:00', '1:00 - 2:00']
+  },
+  {
+    id: 102,
+    name: 'Rajesh Sharma',
+    qualification: 'MBBS, MS (Orthopaedics)',
+    specialty: 'Orthopaedics',
+    expertise: 'Joint Replacement, Sports',
+    experienceYears: 5,
+    photoUrl: 'https://i.pravatar.cc/150?img=68',
+    availableSlots: ['9:00 - 10:00', '10:00 - 12:00', '1:00 - 2:00']
+  },
+  {
+    id: 103,
+    name: 'Sarah Chen',
+    qualification: 'Dermatology, PhD',
+    specialty: 'Dermatology',
+    expertise: 'Cosmetic Procedures',
+    experienceYears: 7,
+    photoUrl: 'https://i.pravatar.cc/150?img=26',
+    availableSlots: ['11:00 - 12:00', '1:00 - 2:00'] // Different slots for variety
+  }
+];
+// --- End Doctor Card Imports and Mock Data ---
+
+
 import './PatientDashboard.css';
 
 const PatientDashboard: React.FC = () => {
@@ -10,7 +60,7 @@ const PatientDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for sidebar collapse
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,7 +79,6 @@ const PatientDashboard: React.FC = () => {
     fetchProfile();
   }, [user]);
 
-  // Handler for sidebar toggle
   const handleToggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
   };
@@ -47,6 +96,13 @@ const PatientDashboard: React.FC = () => {
     navigate(path);
   };
 
+  // Handler for the Doctor Card slot button click
+  const handleSlotSelection = (doctorId: number, timeSlot: string) => {
+    console.log(`Booking request: Doctor ID ${doctorId} at ${timeSlot}`);
+    // Navigates to a confirmation page with data encoded in the URL
+    navigate(`/book-appointment/confirm?doctorId=${doctorId}&slot=${encodeURIComponent(timeSlot)}`);
+  }
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -56,8 +112,6 @@ const PatientDashboard: React.FC = () => {
   }
 
   const mainLayoutClass = `dashboard-main-layout ${isSidebarOpen ? '' : 'sidebar-collapsed'}`;
-
-  // Helper to extract first name for a friendlier welcome message
   const firstName = profile?.name ? profile.name.split(' ')[0] : 'Patient';
 
   return (
@@ -94,7 +148,7 @@ const PatientDashboard: React.FC = () => {
             <div className="dashboard-nav">
               <nav>
                 <button 
-                  className="nav-button active" // Set 'active' for the current view
+                  className="nav-button active"
                   onClick={() => handleNavigate('/dashboard')} 
                 >
                   <i className="fas fa-home"></i> 
@@ -144,65 +198,19 @@ const PatientDashboard: React.FC = () => {
 
         {/* START: Main Content */}
         <div className="dashboard-content">
-          <div className="welcome-card">
-            <h2>Portal Overview</h2>
-            <p>You're successfully logged in to the patient portal. Use the menu on the left to navigate your health data.</p>
-          </div>
-
-          <div className="profile-card">
-            <h3>Patient Profile</h3>
-            <div className="profile-grid">
-              <div className="profile-item">
-                <strong>Patient ID:</strong>
-                <span>{profile?.patientId || 'N/A'}</span>
-              </div>
-              
-              <div className="profile-item">
-                <strong>Name:</strong>
-                <span>{profile?.name || 'N/A'}</span>
-              </div>
-
-              <div className="profile-item">
-                <strong>Email:</strong>
-                <span>{user?.email}</span>
-              </div>
-              
-              <div className="profile-item">
-                <strong>Phone:</strong>
-                <span>{profile?.phone || 'N/A'}</span>
-              </div>
-              
-              <div className="profile-item">
-                <strong>Gender:</strong>
-                <span>{profile?.gender || 'N/A'}</span>
-              </div>
-              
-              <div className="profile-item">
-                <strong>Date of Birth:</strong>
-                <span>{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : 'N/A'}</span>
-              </div>
-              
-              <div className="profile-item">
-                <strong>Address:</strong>
-                <span>{profile?.address || 'N/A'}</span>
-              </div>
-              
-              <div className="profile-item">
-                <strong>Emergency Contact:</strong>
-                <span>{profile?.emergencyContact || 'N/A'}</span>
-              </div>
+          {/* Doctor Card Integration */}
+          <div className="info-card doctor-list-card">
+            <h3>My Healthcare Team</h3>
+            <p>Quickly book an appointment or view details for your primary care providers by selecting an available slot.</p>
+            
+            <div className="doctor-list-container-override">
+                <DoctorList 
+                    doctors={MOCK_DOCTORS} 
+                    onSlotClick={handleSlotSelection}
+                />
             </div>
           </div>
 
-          <div className="info-card">
-            <h3>Quick Actions</h3>
-            <p>Ready to manage your health? Click on an item in the sidebar to get started.</p>
-            <ul style={{ marginTop: '15px', paddingLeft: '20px', color: '#666' }}>
-              <li>**Visit History**: Review past appointments and visit notes.</li>
-              <li>**Prescriptions**: Check your active and past medication lists.</li>
-              <li>**Upcoming Meets**: Schedule or confirm your future appointments.</li>
-            </ul>
-          </div>
         </div>
         {/* END: Main Content */}
       </div>
