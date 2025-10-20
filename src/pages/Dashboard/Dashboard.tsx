@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { getUserProfile } from '../services/userService';
-import type { Doctor, Patient, Management } from '../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { getUserProfile } from '../../services/userService';
+import type { Doctor, Patient, Management } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {

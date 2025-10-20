@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/Login';
-import DoctorDashboard from './pages/DoctorDashboard';
-import PatientDashboard from './pages/PatientDashboard';
+import DoctorDashboard from './pages/Dashboard/DoctorDashboard';
+import PatientDashboard from './pages/Dashboard/PatientDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardRedirect from './components/DashboardRedirect';
 import './App.css';
