@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import type { UserType } from '../types';
 import './Login.css';
 
 const Login: React.FC = () => {
@@ -11,21 +10,16 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
   
-  // User type selection
-  const [userType, setUserType] = useState<UserType>('patient');
+  // User type selection (only patient and doctor)
+  const [userType, setUserType] = useState<'doctor' | 'patient'>('patient');
   
   // Common fields
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   
-  // Doctor/Management fields
+  // Doctor fields
   const [department, setDepartment] = useState('');
-  
-  // Doctor specific
   const [specialization, setSpecialization] = useState('');
-  
-  // Management specific
-  const [role, setRole] = useState('');
   
   // Patient specific
   const [address, setAddress] = useState('');
@@ -48,8 +42,6 @@ const Login: React.FC = () => {
         
         if (userType === 'doctor') {
           profileData = { ...profileData, specialization, department };
-        } else if (userType === 'management') {
-          profileData = { ...profileData, role, department };
         } else if (userType === 'patient') {
           profileData = { 
             ...profileData, 
@@ -77,7 +69,6 @@ const Login: React.FC = () => {
     setPhone('');
     setDepartment('');
     setSpecialization('');
-    setRole('');
     setAddress('');
     setDateOfBirth('');
     setGender('male');
@@ -135,13 +126,6 @@ const Login: React.FC = () => {
                   onClick={() => { setUserType('doctor'); resetForm(); }}
                 >
                   👨‍⚕️ Doctor
-                </button>
-                <button
-                  type="button"
-                  className={`type-button ${userType === 'management' ? 'active' : ''}`}
-                  onClick={() => { setUserType('management'); resetForm(); }}
-                >
-                  💼 Management
                 </button>
               </div>
             </div>
@@ -209,32 +193,6 @@ const Login: React.FC = () => {
                       value={specialization}
                       onChange={(e) => setSpecialization(e.target.value)}
                       placeholder="e.g., Cardiology, Neurology"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="department">Department</label>
-                    <input
-                      type="text"
-                      id="department"
-                      value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      placeholder="Enter department"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Management-specific fields */}
-              {userType === 'management' && (
-                <>
-                  <div className="form-group">
-                    <label htmlFor="role">Role</label>
-                    <input
-                      type="text"
-                      id="role"
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                      placeholder="e.g., Admin, HR Manager"
                     />
                   </div>
                   <div className="form-group">
