@@ -1,104 +1,146 @@
-import React, { useState } from 'react';
-import './DoctorCard.css'; 
+import React, { useState } from "react";
+import "./DoctorCard.css";
 
-// 1. Define the updated TypeScript interface for the Doctor data
-interface Doctor {
-  id: number;
+// Firestore Doctor type
+export interface Doctor {
+  id: string;
+  doctorId: string;
   name: string;
-  qualification: string;
-  specialty: string;
-  expertise: string;
-  experienceYears: number;
-  photoUrl: string;
-  // NEW: Array of available time slots
-  availableSlots: string[]; 
+  email: string;
+  phone: string;
+  department: string;
+  specialization: string;
+  status: string;
+  slots: Record<string, boolean>;
+  imageUrl: string;
+  experienceYears?: number;
+  expertise?: string;
+  qualification?: string;
 }
 
-// 2. Define the updated props for the DoctorCard component
+// Props for single DoctorCard
 interface DoctorCardProps {
-  doctor: Doctor; 
-  // Handler now accepts both ID and the selected slot
-  onSlotClick: (doctorId: number, timeSlot: string) => void;
+  doctor: Doctor;
+  onSlotClick: (doctorId: string, timeSlot: string) => void;
 }
 
-const DoctorCard: React.FC<DoctorCardProps> = ({ 
-  doctor, 
-  onSlotClick 
-}) => {
-  const { 
-    id, 
-    name, 
-    qualification, 
-    specialty, 
-    expertise, 
-    experienceYears, 
-    photoUrl,
-    availableSlots // Destructure the new slot array
-  } = doctor;
-
-  // State to track the locally selected slot before confirmation (Optional, but good UX)
+const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onSlotClick }) => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-  const handleSlotClick = (slot: string) => {
+  const handleSlotClick = (slot: string, isAvailable: boolean) => {
+    // Prevent action if slot is not available
+    if (!isAvailable) {
+      return;
+    }
+    
     setSelectedSlot(slot);
-    // Immediately trigger the parent handler to proceed with the booking logic
-    onSlotClick(id, slot);
+    onSlotClick(doctor.doctorId, slot);
   };
-  
+
   const handlePhotoError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // Fallback image if photoUrl is broken (optional but recommended)
-    e.currentTarget.src = 'https://via.placeholder.com/70x70.png?text=DR';
+    e.currentTarget.src = "https://via.placeholder.com/70x70.png?text=DR";
   };
+
+  // Count available slots
+  const availableSlotsCount = Object.values(doctor.slots).filter(Boolean).length;
+  const totalSlots = Object.keys(doctor.slots).length;
+
+  // Format experience years
+  const experienceText = doctor.experienceYears 
+    ? `${doctor.experienceYears} ${doctor.experienceYears === 1 ? 'Year' : 'Years'}`
+    : 'N/A';
 
   return (
     <div className="doctor-card">
       <div className="card-header">
         <div className="doctor-photo-container">
-          <img 
-            src={photoUrl} 
-            alt={`Photo of Dr. ${name}`} 
-            className="doctor-photo" 
+          <img
+            src={doctor.imageUrl}
+            alt={`Photo of Dr. ${doctor.name}`}
+            className="doctor-photo"
             onError={handlePhotoError}
           />
         </div>
         <div className="doctor-name-info">
-          <h3 className="doctor-name">Dr. {name}</h3>
-          <p className="doctor-qualification">{qualification}</p>
+          <h3 className="doctor-name">Dr. {doctor.name}</h3>
+          <p className="doctor-qualification">
+            {doctor.qualification || doctor.specialization}
+          </p>
         </div>
       </div>
-      
+
       <div className="card-body">
-        {/* ... Existing Details ... */}
         <div className="detail-item">
-          <span className="label">Specialist:</span>
-          <span className="value specialist">{specialty}</span>
+          <span className="label">
+            <i className="fas fa-building"></i> Department:
+          </span>
+          <span className="value">{doctor.department}</span>
         </div>
         
         <div className="detail-item">
-          <span className="label">Expertise:</span>
-          <span className="value">{expertise}</span>
+          <span className="label">
+            <i className="fas fa-stethoscope"></i> Specialty:
+          </span>
+          <span className="value">{doctor.specialization}</span>
         </div>
         
-        <div className="detail-item detail-no-border">
-          <span className="label">Experience:</span>
-          <span className="value experience">{experienceYears}+ Years</span>
+        <div className="detail-item">
+          <span className="label">
+            <i className="fas fa-award"></i> Experience:
+          </span>
+          <span className="value">{experienceText}</span>
         </div>
         
-        {/* NEW: Time Slots Section */}
+        {doctor.expertise && (
+          <div className="detail-item detail-no-border">
+            <span className="label">
+              <i className="fas fa-star"></i> Expertise:
+            </span>
+            <span className="value">{doctor.expertise}</span>
+          </div>
+        )}
+
+        {/* Time Slots */}
         <div className="time-slots-section">
-            <span className="label slots-label">Available Slots Today:</span>
+          <span className="label slots-label">
+            <i className="fas fa-clock"></i> Available Slots Today ({availableSlotsCount}/{totalSlots}):
+          </span>
+          
+          {totalSlots === 0 ? (
+            <p className="no-slots-message">
+              <i className="fas fa-info-circle"></i> No slots configured
+            </p>
+          ) : availableSlotsCount === 0 ? (
+            <p className="no-slots-message error">
+              <i className="fas fa-exclamation-circle"></i> No available slots today
+            </p>
+          ) : (
             <div className="slots-container">
-                {availableSlots.map(slot => (
-                    <button 
-                        key={slot}
-                        className={`slot-button ${selectedSlot === slot ? 'selected' : ''}`}
-                        onClick={() => handleSlotClick(slot)}
-                        title={`Book appointment at ${slot}`}
-                    >
-                        {slot}
-                    </button>
-                ))}
+              {Object.entries(doctor.slots).map(([slot, isAvailable]) => (
+                <button
+                  key={slot}
+                  disabled={!isAvailable}
+                  className={`slot-button ${
+                    selectedSlot === slot ? "selected" : ""
+                  } ${!isAvailable ? "disabled" : ""}`}
+                  onClick={() => handleSlotClick(slot, isAvailable)}
+                  title={
+                    isAvailable
+                      ? `Book appointment at ${slot}`
+                      : `Slot ${slot} is already booked`
+                  }
+                  aria-label={
+                    isAvailable
+                      ? `Book appointment at ${slot}`
+                      : `Slot ${slot} unavailable`
+                  }
+                  style={!isAvailable ? { pointerEvents: 'none' } : undefined}
+                >
+                  <i className="fas fa-calendar-check"></i> {slot}
+                </button>
+              ))}
             </div>
+          )}
         </div>
       </div>
     </div>
@@ -107,26 +149,30 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
 
 export default DoctorCard;
 
-// ----------------------------------------------------------------------
-// 3. Reusable Component to render an Array of Cards (DoctorList)
-// ----------------------------------------------------------------------
-
+// -------------------------------
+// Optional: DoctorList component
+// -------------------------------
 interface DoctorListProps {
-    doctors: Doctor[];
-    // Pass the slot handler down
-    onSlotClick: (doctorId: number, timeSlot: string) => void;
+  doctors: Doctor[];
+  onSlotClick: (doctorId: string, timeSlot: string) => void;
 }
 
 export const DoctorList: React.FC<DoctorListProps> = ({ doctors, onSlotClick }) => {
+  if (doctors.length === 0) {
     return (
-        <div className="doctor-list-container">
-            {doctors.map(doctor => (
-                <DoctorCard 
-                    key={doctor.id} 
-                    doctor={doctor} 
-                    onSlotClick={onSlotClick}
-                />
-            ))}
-        </div>
+      <div className="empty-state">
+        <i className="fas fa-user-md"></i>
+        <p>No doctors available at the moment.</p>
+        <small>Please check back later or contact support.</small>
+      </div>
     );
-}
+  }
+
+  return (
+    <div className="doctor-list-container">
+      {doctors.map((doctor) => (
+        <DoctorCard key={doctor.id} doctor={doctor} onSlotClick={onSlotClick} />
+      ))}
+    </div>
+  );
+};

@@ -1,22 +1,125 @@
-/* Container for the Card (Existing Styles) */
-.doctor-card {
-  /* ... existing styles ... */
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  margin: 15px;
-  max-width: 320px; 
-  transition: transform 0.2s, box-shadow 0.2s;
+/* Doctor List Container */
+.doctor-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  width: 100%;
 }
 
-/* Header, Photo, Name, and Detail Styles (Existing Styles) */
-/* ... (Keep all existing styles for .card-header, .doctor-photo, .detail-item, etc.) ... */
+/* Individual Doctor Card */
+.doctor-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
 
-/* Ensure the last detail item has no dashed border for clean separation */
+.doctor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.doctor-card:hover::before {
+  transform: scaleX(1);
+}
+
+.doctor-card:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  border-color: #cbd5e1;
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.doctor-photo-container {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.doctor-photo-container::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: #10b981;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 3px solid #eff6ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.doctor-card:hover .doctor-photo {
+  transform: scale(1.05);
+}
+
+.doctor-name-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doctor-name {
+  margin: 0 0 6px 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.doctor-qualification {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Card Body */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .detail-item {
-  border-bottom: 1px dashed #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 12px;
 }
 
 .detail-item.detail-no-border {
@@ -24,57 +127,314 @@
   padding-bottom: 0;
 }
 
+.detail-item .label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
-/* ------------------------------------------------------------------- */
-/* NEW: Time Slot Styles */
-/* ------------------------------------------------------------------- */
+.detail-item .label i {
+  font-size: 14px;
+  color: #94a3b8;
+  width: 16px;
+  text-align: center;
+}
 
+.detail-item .value {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Time Slots Section */
 .time-slots-section {
-    padding-top: 15px;
-    border-top: 1px solid #f0f0f0;
-    margin-top: 15px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 2px solid #f1f5f9;
 }
 
 .slots-label {
-    display: block;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.slots-label i {
+  font-size: 14px;
+  color: #94a3b8;
 }
 
 .slots-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px; /* Space between time buttons */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
+/* Slot Buttons */
 .slot-button {
-    background-color: #f0f8ff; /* Very light blue background */
-    color: #007bff;
-    border: 1px solid #b3d9ff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.85em;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    flex-grow: 1; /* Allows buttons to fill space evenly */
-    min-width: 80px; /* Ensures buttons aren't too small */
+  padding: 10px 16px;
+  border: 2px solid #cbd5e1;
+  background: white;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 90px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
 }
 
-.slot-button:hover {
-    background-color: #d1e7ff;
-    color: #0056b3;
+.slot-button i {
+  font-size: 12px;
+  transition: transform 0.2s ease;
 }
 
-/* Style for the selected (or just clicked) slot */
+.slot-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.slot-button:hover:not(.disabled) {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.25);
+}
+
+.slot-button:hover:not(.disabled) i {
+  transform: scale(1.1);
+}
+
+.slot-button:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Selected Slot */
 .slot-button.selected {
-    background-color: #28a745; /* Green for booked/selected */
-    color: white;
-    border-color: #218838;
-    transform: scale(1.05);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #2563eb;
+  color: white;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
 }
 
-.slot-button.selected:hover {
-    background-color: #218838;
+.slot-button.selected::after {
+  content: '✓';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Disabled Slot */
+.slot-button.disabled {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.slot-button.disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  height: 2px;
+  background: #cbd5e1;
+  transform: translateY(-50%) rotate(-15deg);
+}
+
+.slot-button.disabled:hover {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #cbd5e1;
+  transform: none;
+  box-shadow: none;
+}
+
+/* No Slots Messages */
+.no-slots-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 14px;
+  margin: 8px 0 0 0;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.no-slots-message i {
+  font-size: 16px;
+}
+
+.no-slots-message.error {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.no-slots-message.error i {
+  color: #ef4444;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.empty-state i {
+  font-size: 64px;
+  color: #cbd5e1;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #475569;
+}
+
+.empty-state small {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .doctor-list-container {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .doctor-list-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .doctor-card {
+    padding: 20px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    padding-bottom: 16px;
+  }
+
+  .doctor-photo {
+    width: 90px;
+    height: 90px;
+  }
+
+  .doctor-name-info {
+    text-align: center;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 0;
+  }
+
+  .detail-item .label {
+    font-size: 12px;
+  }
+
+  .detail-item .value {
+    text-align: left;
+    font-size: 15px;
+  }
+
+  .slot-button {
+    min-width: 85px;
+    font-size: 12px;
+    padding: 9px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .doctor-card {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .card-header {
+    gap: 12px;
+  }
+
+  .doctor-photo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .doctor-name {
+    font-size: 17px;
+  }
+
+  .doctor-qualification {
+    font-size: 13px;
+  }
+
+  .slots-container {
+    gap: 8px;
+  }
+
+  .slot-button {
+    min-width: 75px;
+    font-size: 11px;
+    padding: 8px 12px;
+  }
 }

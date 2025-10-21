@@ -12,18 +12,18 @@ export interface BaseUser {
 }
 
 // Doctor interface
+// src/types/Doctor.ts
 export interface Doctor {
-  id: string;
-  userId: string;
+  id: string; // Firestore document ID
   doctorId: string;
   name: string;
-  specialization?: string;
-  department?: string;
-  phone?: string;
-  status: 'active' | 'inactive';
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  phone: string;
+  department: string;
+  specialization: string;
+  status: string;
+  slots: Record<string, boolean>; // e.g. { "09-10": true, "10-11": false }
+  imageUrl: string;
 }
 
 // Management interface
