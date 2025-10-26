@@ -3,6 +3,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/Login';
 import DoctorDashboard from './pages/Dashboard/DoctorDashboard';
 import PatientDashboard from './pages/Dashboard/PatientDashboard';
+import VideoCall from './pages/VideoCall';
+import BookedAppointments from './pages/BookedAppointments';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardRedirect from './components/DashboardRedirect';
 import './App.css';
@@ -40,6 +42,26 @@ function App() {
             element={
               <PrivateRoute>
                 <PatientDashboard />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Booked Appointments */}
+          <Route
+            path="/booked-appointments"
+            element={
+              <PrivateRoute>
+                <BookedAppointments />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Video Call Page */}
+          <Route
+            path="/video-call/:appointmentId"
+            element={
+              <PrivateRoute>
+                <VideoCall />
               </PrivateRoute>
             }
           />

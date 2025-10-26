@@ -2,72 +2,40 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserProfile } from '../../services/userService';
-import type { Patient } from '../../types';
-import { DoctorList, type Doctor as DoctorType } from '../../components/viewCards/DoctorCard';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { getAvailableDoctors, createAppointment, updateDoctorSlot, updateAppointmentPayment, addToPatientBookedAppointments, getAppointmentById } from '../../services/appointmentService';
+import { createPaymentOrder, initializePayment } from '../../services/paymentService';
+import type { Patient, Doctor } from '../../types';
 import './PatientDashboard.css';
 
 const PatientDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Patient | null>(null);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [doctors, setDoctors] = useState<DoctorType[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-  // Fetch patient profile
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       if (user) {
         try {
+          // Fetch patient profile
           const profileData = await getUserProfile(user.uid, 'patient');
           setProfile(profileData as Patient);
+
+          // Fetch available doctors
+          const availableDoctors = await getAvailableDoctors();
+          setDoctors(availableDoctors);
         } catch (error) {
-          console.error('Error fetching profile:', error);
+          console.error('Error fetching data:', error);
         } finally {
           setLoading(false);
         }
       }
     };
-    fetchProfile();
+
+    fetchData();
   }, [user]);
-
-  // Fetch doctors from Firestore
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'doctors'));
-        const doctorList: DoctorType[] = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          
-          return {
-            id: doc.id,
-            doctorId: data.doctorId || doc.id,
-            name: data.name || 'Unknown',
-            email: data.email || 'N/A',
-            phone: data.phone || 'N/A',
-            department: data.department || data.specialization || 'General',
-            specialization: data.specialization || 'General Practice',
-            status: data.status || 'active',
-            slots: data.slots || {},
-            imageUrl: data.imageUrl || 'https://via.placeholder.com/70x70.png?text=DR',
-            experienceYears: data.experienceYears || data.experience || 0,
-            expertise: data.expertise || data.specialization || '',
-            qualification: data.qualification || data.degree || '',
-          };
-        });
-        setDoctors(doctorList);
-      } catch (error) {
-        console.error('Error fetching doctors:', error);
-      }
-    };
-    fetchDoctors();
-  }, []);
-
-  const handleToggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
-  };
 
   const handleLogout = async () => {
     try {
@@ -78,13 +46,84 @@ const PatientDashboard: React.FC = () => {
     }
   };
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
+  const handleSlotBooking = async (doctor: Doctor, timeSlot: string) => {
+    if (!profile || !user) return;
 
-  const handleSlotSelection = (doctorId: string, timeSlot: string) => {
-    console.log(`Booking request: Doctor ID ${doctorId} at ${timeSlot}`);
-    navigate(`/book-appointment/confirm?doctorId=${doctorId}&slot=${encodeURIComponent(timeSlot)}`);
+    setBookingLoading(true);
+
+    try {
+      // Create appointment in pending state
+      const appointmentId = await createAppointment({
+        patientId: profile.patientId,
+        patientName: profile.name,
+        patientEmail: user.email || '',
+        doctorId: doctor.doctorId,
+        doctorName: doctor.name,
+        doctorEmail: doctor.email,
+        timeSlot: timeSlot,
+        appointmentDate: new Date(),
+        status: 'scheduled',
+        paymentStatus: 'pending',
+        amount: 500, // ₹500 per appointment
+      });
+
+      // Create payment order
+      const order = await createPaymentOrder(500);
+
+      // Initialize Razorpay payment
+      await initializePayment(
+        order,
+        {
+          name: profile.name,
+          email: user.email || '',
+          contact: profile.phone || ''
+        },
+        async (response) => {
+          // Payment successful
+          try {
+            // Update appointment with payment details
+            await updateAppointmentPayment(appointmentId, {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature
+            });
+
+            // Update doctor slot to booked
+            await updateDoctorSlot(doctor.id, timeSlot);
+
+            // Fetch the complete appointment (including meetLink)
+            const completedAppointment = await getAppointmentById(appointmentId);
+
+            // Add to patient's booked appointments subcollection
+            if (user && completedAppointment) {
+              await addToPatientBookedAppointments(user.uid, completedAppointment);
+            }
+
+            // Refresh doctors list to show updated slots
+            const updatedDoctors = await getAvailableDoctors();
+            setDoctors(updatedDoctors);
+
+            // Show success message
+            alert('🎉 Appointment booked successfully! You can view it in "My Appointments" section.');
+          } catch (error) {
+            console.error('Error updating appointment:', error);
+            alert('Payment successful but failed to update appointment. Please contact support.');
+          } finally {
+            setBookingLoading(false);
+          }
+        },
+        (error) => {
+          // Payment failed or cancelled
+          console.error('Payment failed:', error);
+          alert('Payment failed. Please try again.');
+          setBookingLoading(false);
+        }
+      );
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      alert('Failed to initiate booking. Please try again.');
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {
@@ -95,73 +134,89 @@ const PatientDashboard: React.FC = () => {
     );
   }
 
-  const mainLayoutClass = `dashboard-main-layout ${isSidebarOpen ? '' : 'sidebar-collapsed'}`;
-  const firstName = profile?.name ? profile.name.split(' ')[0] : 'Patient';
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div className="header-left">
           <h1>Patient Dashboard</h1>
-          <span className="user-type-badge" style={{ backgroundColor: '#2196F3' }}>
+          <span className="user-type-badge">
             🏥 Patient
           </span>
         </div>
-        <div className="header-right">
-          <span className="welcome-message">Welcome, {firstName}!</span>
-          <button className="logout-button-header" onClick={handleLogout}>
-             Logout
+        <div className="header-actions">
+          <button className="appointments-button" onClick={() => navigate('/booked-appointments')}>
+            📅 My Appointments
+          </button>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
           </button>
         </div>
       </div>
-
-      <div className={mainLayoutClass}>
-        {/* Sidebar */}
-        <div className="sidebar-wrapper">
-          <button className="sidebar-toggle-button" onClick={handleToggleSidebar}>
-            <i 
-              className={`fas ${isSidebarOpen ? 'fa-angle-left' : 'fa-angle-right'}`}
-              title={isSidebarOpen ? 'Collapse Menu' : 'Expand Menu'}
-            ></i>
-            {isSidebarOpen && <span className="toggle-text">Collapse Menu</span>}
-          </button>
-
-          <div className="dashboard-nav">
-            <nav>
-              <button className="nav-button active" onClick={() => handleNavigate('/dashboard')}>
-                <i className="fas fa-home"></i> {isSidebarOpen && <span>Dashboard Home</span>}
-              </button>
-              <button className="nav-button" onClick={() => handleNavigate('/history')}>
-                <i className="fas fa-history"></i> {isSidebarOpen && <span>Visit History</span>}
-              </button>
-              <button className="nav-button" onClick={() => handleNavigate('/records')}>
-                <i className="fas fa-folder-open"></i> {isSidebarOpen && <span>My Records</span>}
-              </button>
-              <button className="nav-button" onClick={() => handleNavigate('/prescriptions')}>
-                <i className="fas fa-file-prescription"></i> {isSidebarOpen && <span>Prescriptions</span>}
-              </button>
-              <button className="nav-button" onClick={() => handleNavigate('/appointments')}>
-                <i className="fas fa-calendar-alt"></i> {isSidebarOpen && <span>Upcoming Meets</span>}
-              </button>
-              <button className="nav-button logout-button" onClick={handleLogout}>
-                <i className="fas fa-sign-out-alt"></i> {isSidebarOpen && <span>Logout</span>}
-              </button>
-            </nav>
-          </div>
+      
+      <div className="dashboard-content">
+        <div className="welcome-card">
+          <h2>Welcome, {profile?.name || 'Patient'}!</h2>
+          <p>Book an appointment with our available doctors.</p>
         </div>
 
-        {/* Main Content */}
-        <div className="dashboard-content">
-          <div className="info-card doctor-list-card">
-            <h3>My Healthcare Team</h3>
-            <p>Quickly book an appointment or view details for your primary care providers by selecting an available slot.</p>
-            
-            <div className="doctor-list-container-override">
-              <DoctorList doctors={doctors} onSlotClick={handleSlotSelection} />
+        {/* Available Doctors */}
+        <div className="doctors-section">
+          <h3>Available Doctors</h3>
+          {doctors.length === 0 ? (
+            <p className="no-doctors">No doctors available at the moment.</p>
+          ) : (
+            <div className="doctors-grid">
+              {doctors.map((doctor) => (
+                <div key={doctor.id} className="doctor-card">
+                  <div className="doctor-header">
+                    <img 
+                      src={doctor.imageUrl || 'https://via.placeholder.com/100'} 
+                      alt={doctor.name}
+                      className="doctor-image"
+                    />
+                    <div className="doctor-info">
+                      <h4>{doctor.name}</h4>
+                      <p className="specialization">{doctor.specialization}</p>
+                      <p className="department">{doctor.department}</p>
+                    </div>
+                  </div>
+
+                  <div className="slots-section">
+                    <p className="slots-label">Available Slots:</p>
+                    <div className="slots-grid">
+                      {doctor.slots && Object.entries(doctor.slots).map(([slot, isBooked]) => (
+                        <button
+                          key={slot}
+                          className={`slot-button ${isBooked ? 'booked' : 'available'}`}
+                          disabled={isBooked || bookingLoading}
+                          onClick={() => handleSlotBooking(doctor, slot)}
+                        >
+                          {slot}
+                          {isBooked && <span className="booked-badge">Booked</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="appointment-price">
+                    <span>Consultation Fee:</span>
+                    <strong>₹500</strong>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
+
+      {bookingLoading && (
+        <div className="payment-overlay">
+          <div className="payment-loader">
+            <div className="spinner"></div>
+            <p>Processing your payment...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
