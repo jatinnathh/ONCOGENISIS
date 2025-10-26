@@ -3,9 +3,13 @@ import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/Login';
 import DoctorDashboard from './pages/Dashboard/DoctorDashboard';
 import PatientDashboard from './pages/Dashboard/PatientDashboard';
+import VideoCall from './pages/VideoCall';
+import BookedAppointments from './pages/BookedAppointments';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardRedirect from './components/DashboardRedirect';
+import PrescriptionPage from './pages/Prescription/DoctorPrescriptionPage';
 import './App.css';
+import { PrinterCheck } from 'lucide-react';
 
 function App() {
   return (
@@ -43,6 +47,34 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          {/* Booked Appointments */}
+          <Route
+            path="/booked-appointments"
+            element={
+              <PrivateRoute>
+                <BookedAppointments />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Video Call Page */}
+          <Route
+            path="/video-call/:appointmentId"
+            element={
+              <PrivateRoute>
+                <VideoCall />
+              </PrivateRoute>
+            }
+          />
+          <Route 
+          path="/doctor/prescription"
+          element={
+            <PrivateRoute>
+              <PrescriptionPage/>
+            </PrivateRoute>
+          }
+          ></Route>
           
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>

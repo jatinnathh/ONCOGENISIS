@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Plus, FileDown, Trash2 } from 'lucide-react';
 import { useDoctorProfile } from '../../contexts/AuthContext';
-import {db} from '../../services/firebase'
-import { addDoc,collection } from 'firebase/firestore';
-const doctorProfile = useDoctorProfile();
-
+import { db } from '../../services/firebase';
+import { addDoc, collection } from 'firebase/firestore';
+import './prescription.css';
 
 // Medicine database - in production, import this from a separate file
 const MEDICINES = [
@@ -30,12 +29,38 @@ const MEDICINES = [
   { id: 20, name: 'Filgrastim (Neupogen)', category: 'Supportive Care' }
 ];
 
-export default function PrescriptionSystem() {
+interface PatientData {
+  id: string;
+  name: string;
+  age: string;
+  gender: string;
+}
+
+interface PrescriptionSystemProps {
+  patientData?: PatientData;
+}
+
+interface Medicine {
+  id: number;
+  name: string;
+  category: string;
+}
+
+interface Prescription {
+  id: number;
+  medicine: Medicine;
+  days: number;
+  timesPerDay: number;
+  totalDoses: number;
+}
+
+export default function PrescriptionSystem({ patientData }: PrescriptionSystemProps) {
+  const doctorProfile = useDoctorProfile();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMedicine, setSelectedMedicine] = useState(null);
+  const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
   const [days, setDays] = useState('');
   const [timesPerDay, setTimesPerDay] = useState('');
-  const [prescriptions, setPrescriptions] = useState([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [patientInfo, setPatientInfo] = useState({
     patientId: '',
@@ -44,37 +69,22 @@ export default function PrescriptionSystem() {
     gender: ''
   });
 
-
-
-   useEffect(() => {
-    if (location.state) {
+  useEffect(() => {
+    if (patientData) {
       setPatientInfo({
-        patientId: location.state.patientId || 'P' + Date.now(),
-        patientName: location.state.patientName || 'Unknown Patient',
-        age: location.state.age || '0',
-        gender: location.state.gender || 'Not specified'
+        patientId: patientData.id || 'P' + Date.now(),
+        patientName: patientData.name || 'Unknown',
+        age: patientData.age || '0',
+        gender: patientData.gender || 'Not specified'
       });
     } else {
-      // If no patient data provided, redirect back or show error
       console.warn('No patient data provided');
-      // You can redirect back or show an error message
-      // navigate('/patients');
     }
-  }, [location.state]);
+  }, [patientData]);
 
-
-
-  // Patient and doctor info (in production, get from system/context)
-  const patientInfo = {
-    patientId: 'P' + Date.now(), // Get from system
-    patientName: 'John Doe', // Get from system
-    age: '45', // Get from system
-    gender: 'Male' // Get from system
-  };
-  
   const doctorInfo = {
-    doctorId: doctorProfile?.doctorId, // Get from Firebase Auth
-    doctorName:doctorProfile?.name,
+    doctorId: doctorProfile?.doctorId,
+    doctorName: doctorProfile?.name,
     specialty: doctorProfile?.specialization
   };
 
@@ -89,7 +99,7 @@ export default function PrescriptionSystem() {
       return;
     }
 
-    const newPrescription = {
+    const newPrescription: Prescription = {
       id: Date.now(),
       medicine: selectedMedicine,
       days: parseInt(days),
@@ -105,7 +115,7 @@ export default function PrescriptionSystem() {
     setShowDropdown(false);
   };
 
-  const handleRemovePrescription = (id:) => {
+  const handleRemovePrescription = (id: number) => {
     setPrescriptions(prescriptions.filter(p => p.id !== id));
   };
 
@@ -115,20 +125,16 @@ export default function PrescriptionSystem() {
       return;
     }
 
-    // Firestore data structure
     const prescriptionData = {
-      // Patient Information
       patientId: patientInfo.patientId,
       patientName: patientInfo.patientName,
       patientAge: patientInfo.age,
       patientGender: patientInfo.gender,
       
-      // Doctor Information
       doctorId: doctorInfo.doctorId,
       doctorName: doctorInfo.doctorName,
       doctorSpecialty: doctorInfo.specialty,
       
-      // Prescription Details
       medicines: prescriptions.map(p => ({
         medicineId: p.medicine.id,
         medicineName: p.medicine.name,
@@ -138,17 +144,13 @@ export default function PrescriptionSystem() {
         totalDoses: p.totalDoses
       })),
       
-      // Metadata
       prescriptionDate: new Date().toISOString(),
       status: 'active',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    // Firebase code (uncomment in production):
-    
     try {
-  
       const prescriptionRef = await addDoc(collection(db, 'prescriptions'), prescriptionData);
       console.log('Prescription saved with ID:', prescriptionRef.id);
       alert('Prescription saved successfully!');
@@ -156,14 +158,9 @@ export default function PrescriptionSystem() {
       console.error('Error saving prescription:', error);
       alert('Error saving prescription');
     }
-  
-
-    console.log('Prescription data to save:', prescriptionData);
-    alert('Prescription saved! (Check console for data structure)');
   };
 
   const handleExportPDF = () => {
-    // In production, use jsPDF or similar library
     const content = `
 PRESCRIPTION
 ${'='.repeat(50)}
@@ -208,47 +205,45 @@ Date: ${new Date().toLocaleDateString()}
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div className="prescription-container">
+      <div className="prescription-wrapper">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
-          <h1 className="text-3xl font-bold">Doctor Prescription System</h1>
-          <p className="text-blue-100 mt-1">Create and manage patient prescriptions</p>
+        <div className="prescription-header">
+          <h1>Doctor Prescription System</h1>
+          <p>Create and manage patient prescriptions</p>
         </div>
 
-        <div className="p-6">
+        <div className="prescription-content">
           {/* Patient Information Display */}
-          <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Patient Information</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Patient ID</p>
-                <p className="text-base font-semibold text-gray-900">{patientInfo.patientId}</p>
+          <div className="patient-info-section">
+            <h2>Patient Information</h2>
+            <div className="patient-info-grid">
+              <div className="patient-info-item">
+                <p>Patient ID</p>
+                <p>{patientInfo.patientId}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Patient Name</p>
-                <p className="text-base font-semibold text-gray-900">{patientInfo.patientName}</p>
+              <div className="patient-info-item">
+                <p>Patient Name</p>
+                <p>{patientInfo.patientName}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Age</p>
-                <p className="text-base font-semibold text-gray-900">{patientInfo.age} years</p>
+              <div className="patient-info-item">
+                <p>Age</p>
+                <p>{patientInfo.age} years</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Gender</p>
-                <p className="text-base font-semibold text-gray-900">{patientInfo.gender}</p>
+              <div className="patient-info-item">
+                <p>Gender</p>
+                <p>{patientInfo.gender}</p>
               </div>
             </div>
           </div>
 
           {/* Add Prescription Form */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="prescription-form">
             {/* Medicine Search */}
-            <div className="md:col-span-2 relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Medicine
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+            <div className="form-field form-field-wide">
+              <label className="form-label">Search Medicine</label>
+              <div className="form-input-wrapper">
+                <Search className="input-icon" size={20} />
                 <input
                   type="text"
                   placeholder="Search medicine..."
@@ -258,15 +253,14 @@ Date: ${new Date().toLocaleDateString()}
                     setShowDropdown(true);
                   }}
                   onFocus={() => setShowDropdown(true)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="form-input"
                 />
               </div>
               
               {/* Dropdown */}
               {showDropdown && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                <div className="medicine-dropdown">
                   {searchTerm === '' ? (
-                    // Show all medicines when input is empty
                     MEDICINES.map(med => (
                       <div
                         key={med.id}
@@ -275,14 +269,13 @@ Date: ${new Date().toLocaleDateString()}
                           setSearchTerm(med.name);
                           setShowDropdown(false);
                         }}
-                        className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                        className="dropdown-item"
                       >
-                        <div className="font-medium text-gray-900">{med.name}</div>
-                        <div className="text-sm text-gray-500">{med.category}</div>
+                        <div className="dropdown-medicine-name">{med.name}</div>
+                        <div className="dropdown-medicine-category">{med.category}</div>
                       </div>
                     ))
                   ) : (
-                    // Show filtered medicines when searching
                     filteredMedicines.length > 0 ? (
                       filteredMedicines.map(med => (
                         <div
@@ -292,106 +285,89 @@ Date: ${new Date().toLocaleDateString()}
                             setSearchTerm(med.name);
                             setShowDropdown(false);
                           }}
-                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                          className="dropdown-item"
                         >
-                          <div className="font-medium text-gray-900">{med.name}</div>
-                          <div className="text-sm text-gray-500">{med.category}</div>
+                          <div className="dropdown-medicine-name">{med.name}</div>
+                          <div className="dropdown-medicine-category">{med.category}</div>
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-3 text-gray-500">No medicines found</div>
+                      <div className="dropdown-no-results">No medicines found</div>
                     )
                   )}
                 </div>
               )}
               
               {selectedMedicine && (
-                <div className="mt-2 text-sm text-green-600 font-medium">
+                <div className="selected-medicine-text">
                   Selected: {selectedMedicine.name}
                 </div>
               )}
             </div>
 
             {/* Days Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration (Days)
-              </label>
+            <div className="form-field">
+              <label className="form-label">Duration (Days)</label>
               <input
                 type="number"
                 placeholder="e.g., 7"
                 value={days}
                 onChange={(e) => setDays(e.target.value)}
                 min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="form-input form-input-simple"
               />
             </div>
 
             {/* Times per Day Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Times/Day
-              </label>
+            <div className="form-field">
+              <label className="form-label">Times/Day</label>
               <input
                 type="number"
                 placeholder="e.g., 3"
                 value={timesPerDay}
                 onChange={(e) => setTimesPerDay(e.target.value)}
                 min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="form-input form-input-simple"
               />
             </div>
           </div>
 
           {/* Add Button */}
-          <button
-            onClick={handleAddPrescription}
-            className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 font-medium mb-6"
-          >
+          <button onClick={handleAddPrescription} className="add-prescription-btn">
             <Plus size={20} />
             Add to Prescription
           </button>
 
           {/* Prescriptions Table */}
           {prescriptions.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Prescription Summary</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+            <div className="prescription-summary">
+              <h2>Prescription Summary</h2>
+              <div className="prescription-table-wrapper">
+                <table className="prescription-table">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-3 text-left">#</th>
-                      <th className="border border-gray-300 px-4 py-3 text-left">Medicine Name</th>
-                      <th className="border border-gray-300 px-4 py-3 text-left">Category</th>
-                      <th className="border border-gray-300 px-4 py-3 text-center">Days</th>
-                      <th className="border border-gray-300 px-4 py-3 text-center">Times/Day</th>
-                      <th className="border border-gray-300 px-4 py-3 text-center">Total Doses</th>
-                      <th className="border border-gray-300 px-4 py-3 text-center">Action</th>
+                    <tr>
+                      <th>#</th>
+                      <th>Medicine Name</th>
+                      <th>Category</th>
+                      <th className="text-center">Days</th>
+                      <th className="text-center">Times/Day</th>
+                      <th className="text-center">Total Doses</th>
+                      <th className="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {prescriptions.map((prescription, index) => (
-                      <tr key={prescription.id} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
-                        <td className="border border-gray-300 px-4 py-3 font-medium">
-                          {prescription.medicine.name}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-3 text-sm text-gray-600">
-                          {prescription.medicine.category}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-3 text-center">
-                          {prescription.days}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-3 text-center">
-                          {prescription.timesPerDay}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-3 text-center font-semibold">
-                          {prescription.totalDoses}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-3 text-center">
+                      <tr key={prescription.id}>
+                        <td>{index + 1}</td>
+                        <td className="medicine-name">{prescription.medicine.name}</td>
+                        <td className="medicine-category">{prescription.medicine.category}</td>
+                        <td className="text-center">{prescription.days}</td>
+                        <td className="text-center">{prescription.timesPerDay}</td>
+                        <td className="text-center total-doses">{prescription.totalDoses}</td>
+                        <td className="text-center">
                           <button
                             onClick={() => handleRemovePrescription(prescription.id)}
-                            className="text-red-600 hover:text-red-800 transition"
+                            className="delete-btn"
                           >
                             <Trash2 size={18} />
                           </button>
@@ -403,17 +379,11 @@ Date: ${new Date().toLocaleDateString()}
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col md:flex-row gap-4 mt-6">
-                <button
-                  onClick={handleSaveToFirebase}
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                >
+              <div className="action-buttons">
+                <button onClick={handleSaveToFirebase} className="save-btn">
                   Save to Database
                 </button>
-                <button
-                  onClick={handleExportPDF}
-                  className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2 font-medium"
-                >
+                <button onClick={handleExportPDF} className="export-btn">
                   <FileDown size={20} />
                   Export Prescription
                 </button>
@@ -422,9 +392,9 @@ Date: ${new Date().toLocaleDateString()}
           )}
 
           {prescriptions.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
-              <p className="text-lg">No prescriptions added yet</p>
-              <p className="text-sm">Add medicines using the form above</p>
+            <div className="empty-state">
+              <p>No prescriptions added yet</p>
+              <p>Add medicines using the form above</p>
             </div>
           )}
         </div>
