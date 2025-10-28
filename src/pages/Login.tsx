@@ -179,6 +179,7 @@ const Login: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Enter your phone number"
+                  required
                 />
               </div>
 
@@ -192,7 +193,8 @@ const Login: React.FC = () => {
                       id="specialization"
                       value={specialization}
                       onChange={(e) => setSpecialization(e.target.value)}
-                      placeholder="e.g., Cardiology, Neurology"
+                      placeholder="e.g., Cardiology, Neurology, Bone & Joint Specialist"
+                      required
                     />
                   </div>
                   <div className="form-group">
@@ -202,7 +204,8 @@ const Login: React.FC = () => {
                       id="department"
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
-                      placeholder="Enter department"
+                      placeholder="e.g., Orthopedics, Cardiology"
+                      required
                     />
                   </div>
                 </>

@@ -36,6 +36,27 @@ export const createBaseUser = async (
   });
 };
 
+// Generate random profile image for doctor
+const generateDoctorImageUrl = () => {
+  const randomId = Math.floor(Math.random() * 99) + 1;
+  const gender = Math.random() > 0.5 ? 'men' : 'women';
+  return `https://randomuser.me/api/portraits/${gender}/${randomId}.jpg`;
+};
+
+// Generate default time slots for doctor
+const generateDefaultSlots = () => {
+  return {
+    '09-10': false,
+    '10-11': false,
+    '11-12': false,
+    '12-13': false,
+    '14-15': false,
+    '15-16': false,
+    '16-17': false,
+    '17-18': false,
+  };
+};
+
 // Create doctor profile
 export const createDoctorProfile = async (
   userId: string,
@@ -53,6 +74,8 @@ export const createDoctorProfile = async (
     specialization: data.specialization || '',
     department: data.department || '',
     phone: data.phone || '',
+    imageUrl: generateDoctorImageUrl(),
+    slots: generateDefaultSlots(),
     status: 'active',
   };
 

@@ -9,8 +9,6 @@ import PrivateRoute from './components/PrivateRoute';
 import DashboardRedirect from './components/DashboardRedirect';
 import PrescriptionPage from './pages/Prescription/DoctorPrescriptionPage';
 import './App.css';
-import { PrinterCheck } from 'lucide-react';
-
 function App() {
   return (
     <Router>
