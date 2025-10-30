@@ -7,27 +7,57 @@ import './prescription.css';
 
 // Medicine database - in production, import this from a separate file
 const MEDICINES = [
-  { id: 1, name: 'Paclitaxel', category: 'Chemotherapy' },
-  { id: 2, name: 'Carboplatin', category: 'Chemotherapy' },
-  { id: 3, name: 'Cisplatin', category: 'Chemotherapy' },
-  { id: 4, name: 'Doxorubicin', category: 'Chemotherapy' },
-  { id: 5, name: 'Cyclophosphamide', category: 'Chemotherapy' },
-  { id: 6, name: 'Fluorouracil (5-FU)', category: 'Chemotherapy' },
-  { id: 7, name: 'Methotrexate', category: 'Chemotherapy' },
-  { id: 8, name: 'Vincristine', category: 'Chemotherapy' },
-  { id: 9, name: 'Irinotecan', category: 'Chemotherapy' },
-  { id: 10, name: 'Oxaliplatin', category: 'Chemotherapy' },
-  { id: 11, name: 'Pembrolizumab (Keytruda)', category: 'Immunotherapy' },
-  { id: 12, name: 'Nivolumab (Opdivo)', category: 'Immunotherapy' },
-  { id: 13, name: 'Trastuzumab (Herceptin)', category: 'Targeted Therapy' },
-  { id: 14, name: 'Rituximab (Rituxan)', category: 'Targeted Therapy' },
-  { id: 15, name: 'Imatinib (Gleevec)', category: 'Targeted Therapy' },
-  { id: 16, name: 'Erlotinib (Tarceva)', category: 'Targeted Therapy' },
-  { id: 17, name: 'Tamoxifen', category: 'Hormone Therapy' },
-  { id: 18, name: 'Anastrozole (Arimidex)', category: 'Hormone Therapy' },
-  { id: 19, name: 'Ondansetron (Zofran)', category: 'Supportive Care' },
-  { id: 20, name: 'Filgrastim (Neupogen)', category: 'Supportive Care' }
+  // -------------------------
+  // 🧠 Brain Tumor
+  // -------------------------
+  { id: 1, name: 'Temozolomide (Temodar)', category: 'Chemotherapy', diseaseType: 'Glioma' },
+  { id: 2, name: 'Carmustine (BCNU)', category: 'Chemotherapy', diseaseType: 'Glioma' },
+  { id: 3, name: 'Lomustine (CCNU)', category: 'Chemotherapy', diseaseType: 'Glioma' },
+  { id: 4, name: 'Bevacizumab (Avastin)', category: 'Targeted Therapy', diseaseType: 'Glioma' },
+  { id: 5, name: 'Everolimus (Afinitor)', category: 'Targeted Therapy', diseaseType: 'Pituitary Tumor' },
+  { id: 6, name: 'Octreotide (Sandostatin)', category: 'Hormone Therapy', diseaseType: 'Pituitary Tumor' },
+  { id: 7, name: 'Pembrolizumab (Keytruda)', category: 'Immunotherapy', diseaseType: 'Glioma' },
+  { id: 8, name: 'Nivolumab (Opdivo)', category: 'Immunotherapy', diseaseType: 'Glioma' },
+  { id: 9, name: 'Dexamethasone', category: 'Supportive Care', diseaseType: 'Meningioma' },
+  { id: 10, name: 'Levetiracetam (Keppra)', category: 'Supportive Care', diseaseType: 'Any Brain Tumor' },
+
+  // -------------------------
+  // 🫁 Lung Cancer
+  // -------------------------
+  { id: 11, name: 'Cisplatin', category: 'Chemotherapy', diseaseType: 'Adenocarcinoma' },
+  { id: 12, name: 'Carboplatin', category: 'Chemotherapy', diseaseType: 'Adenocarcinoma' },
+  { id: 13, name: 'Paclitaxel (Taxol)', category: 'Chemotherapy', diseaseType: 'Squamous Cell Carcinoma' },
+  { id: 14, name: 'Docetaxel (Taxotere)', category: 'Chemotherapy', diseaseType: 'Adenocarcinoma' },
+  { id: 15, name: 'Gemcitabine (Gemzar)', category: 'Chemotherapy', diseaseType: 'Squamous Cell Carcinoma' },
+  { id: 16, name: 'Pemetrexed (Alimta)', category: 'Chemotherapy', diseaseType: 'Adenocarcinoma' },
+  { id: 17, name: 'Erlotinib (Tarceva)', category: 'Targeted Therapy', diseaseType: 'Adenocarcinoma (EGFR+)' },
+  { id: 18, name: 'Gefitinib (Iressa)', category: 'Targeted Therapy', diseaseType: 'Adenocarcinoma (EGFR+)' },
+  { id: 19, name: 'Osimertinib (Tagrisso)', category: 'Targeted Therapy', diseaseType: 'Adenocarcinoma (EGFR+)' },
+  { id: 20, name: 'Crizotinib (Xalkori)', category: 'Targeted Therapy', diseaseType: 'Adenocarcinoma (ALK+)' },
+  { id: 21, name: 'Pembrolizumab (Keytruda)', category: 'Immunotherapy', diseaseType: 'Adenocarcinoma / Squamous Cell Carcinoma' },
+  { id: 22, name: 'Atezolizumab (Tecentriq)', category: 'Immunotherapy', diseaseType: 'Adenocarcinoma / Squamous Cell Carcinoma' },
+  { id: 23, name: 'Durvalumab (Imfinzi)', category: 'Immunotherapy', diseaseType: 'Adenocarcinoma / Squamous Cell Carcinoma' },
+  { id: 24, name: 'Bevacizumab (Avastin)', category: 'Targeted Therapy', diseaseType: 'Adenocarcinoma' },
+  { id: 25, name: 'Ondansetron (Zofran)', category: 'Supportive Care', diseaseType: 'All Lung Cancer Types' },
+  { id: 26, name: 'Filgrastim (Neupogen)', category: 'Supportive Care', diseaseType: 'All Lung Cancer Types' },
+
+  // -------------------------
+  // 🧴 Skin Cancer
+  // -------------------------
+  { id: 27, name: 'Vemurafenib (Zelboraf)', category: 'Targeted Therapy', diseaseType: 'Melanoma (BRAF+)' },
+  { id: 28, name: 'Dabrafenib (Tafinlar)', category: 'Targeted Therapy', diseaseType: 'Melanoma (BRAF+)' },
+  { id: 29, name: 'Trametinib (Mekinist)', category: 'Targeted Therapy', diseaseType: 'Melanoma (BRAF+)' },
+  { id: 30, name: 'Imiquimod (Aldara)', category: 'Topical Immunotherapy', diseaseType: 'Basal Cell Carcinoma (BCC)' },
+  { id: 31, name: 'Fluorouracil (5-FU)', category: 'Topical Chemotherapy', diseaseType: 'Actinic Keratoses / SCC in situ' },
+  { id: 32, name: 'Pembrolizumab (Keytruda)', category: 'Immunotherapy', diseaseType: 'Melanoma / Advanced Skin Cancer' },
+  { id: 33, name: 'Nivolumab (Opdivo)', category: 'Immunotherapy', diseaseType: 'Melanoma / Advanced Skin Cancer' },
+  { id: 34, name: 'Ipilimumab (Yervoy)', category: 'Immunotherapy', diseaseType: 'Melanoma' },
+  { id: 35, name: 'Cemiplimab (Libtayo)', category: 'Immunotherapy', diseaseType: 'Cutaneous Squamous Cell Carcinoma' },
+  { id: 36, name: 'Interferon-alpha', category: 'Immunotherapy', diseaseType: 'Melanoma' },
+  { id: 37, name: 'Hydrocortisone Cream', category: 'Supportive Care', diseaseType: 'Benign Keratosis / Dermatofibroma' },
+  { id: 38, name: 'Acetaminophen (Tylenol)', category: 'Supportive Care', diseaseType: 'All Skin Cancer Types' }
 ];
+
 
 interface PatientData {
   id: string;

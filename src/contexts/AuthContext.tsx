@@ -3,7 +3,6 @@ import type { User } from 'firebase/auth';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
   onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '../services/firebase';
@@ -52,6 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile>(null);
   const [loading, setLoading] = useState(true);
 
+  // Session storage keys for tab-specific authentication
+  const SESSION_USER_KEY = 'session_user_id';
+  const SESSION_USER_TYPE_KEY = 'session_user_type';
+
   // Function to fetch and set user profile
   const fetchUserProfile = async (userId: string, type: UserType) => {
     try {
@@ -72,31 +75,103 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Save session data to sessionStorage (tab-specific)
+  const saveSessionData = (userId: string, type: UserType) => {
+    sessionStorage.setItem(SESSION_USER_KEY, userId);
+    sessionStorage.setItem(SESSION_USER_TYPE_KEY, type);
+  };
+
+  // Clear session data from sessionStorage
+  const clearSessionData = () => {
+    sessionStorage.removeItem(SESSION_USER_KEY);
+    sessionStorage.removeItem(SESSION_USER_TYPE_KEY);
+  };
+
+  // Load session data on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      
-      if (user) {
+    const loadSessionData = async () => {
+      const sessionUserId = sessionStorage.getItem(SESSION_USER_KEY);
+      const sessionUserType = sessionStorage.getItem(SESSION_USER_TYPE_KEY) as UserType | null;
+
+      if (sessionUserId && sessionUserType) {
         try {
-          // Fetch user type from Firestore
-          const baseUser = await getBaseUser(user.uid);
+          // Verify the session is still valid
+          const baseUser = await getBaseUser(sessionUserId);
           
-          if (baseUser) {
-            setUserType(baseUser.userType);
-            // Fetch complete user profile
-            await fetchUserProfile(user.uid, baseUser.userType);
+          if (baseUser && baseUser.userType === sessionUserType) {
+            // Get current Firebase Auth user
+            const currentUser = auth.currentUser;
+            
+            if (currentUser && currentUser.uid === sessionUserId) {
+              setUser(currentUser);
+              setUserType(sessionUserType);
+              await fetchUserProfile(sessionUserId, sessionUserType);
+            } else {
+              // Session is invalid, clear it
+              clearSessionData();
+            }
+          } else {
+            clearSessionData();
           }
         } catch (error) {
-          console.error('Error loading user data:', error);
-          setUserType(null);
-          setUserProfile(null);
+          console.error('Error loading session data:', error);
+          clearSessionData();
         }
-      } else {
-        setUserType(null);
-        setUserProfile(null);
       }
       
       setLoading(false);
+    };
+
+    loadSessionData();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Only update if this matches our session OR if we have no session
+      const sessionUserId = sessionStorage.getItem(SESSION_USER_KEY);
+      
+      if (!sessionUserId) {
+        // No session data, this is a new login or page refresh
+        setUser(firebaseUser);
+        
+        if (firebaseUser) {
+          try {
+            // Fetch user type from Firestore
+            const baseUser = await getBaseUser(firebaseUser.uid);
+            
+            if (baseUser) {
+              setUserType(baseUser.userType);
+              saveSessionData(firebaseUser.uid, baseUser.userType);
+              // Fetch complete user profile
+              await fetchUserProfile(firebaseUser.uid, baseUser.userType);
+            }
+          } catch (error) {
+            console.error('Error loading user data:', error);
+            setUserType(null);
+            setUserProfile(null);
+            clearSessionData();
+          }
+        } else {
+          setUserType(null);
+          setUserProfile(null);
+          clearSessionData();
+        }
+        
+        setLoading(false);
+      } else if (firebaseUser && firebaseUser.uid === sessionUserId) {
+        // Firebase user matches our session, update user object
+        setUser(firebaseUser);
+      } else if (!firebaseUser) {
+        // User logged out, clear session if it exists
+        const currentSessionUser = sessionStorage.getItem(SESSION_USER_KEY);
+        if (currentSessionUser) {
+          setUser(null);
+          setUserType(null);
+          setUserProfile(null);
+          clearSessionData();
+        }
+      }
+      // Ignore auth changes from other tabs that don't match our session
     });
 
     return unsubscribe;
@@ -105,8 +180,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Profile will be loaded by onAuthStateChanged
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
+      
+      // Fetch user type and save to session
+      const baseUser = await getBaseUser(userId);
+      if (baseUser) {
+        setUser(userCredential.user);
+        setUserType(baseUser.userType);
+        saveSessionData(userId, baseUser.userType);
+        await fetchUserProfile(userId, baseUser.userType);
+      } else {
+        throw new Error('User profile not found');
+      }
+    } catch (error) {
+      clearSessionData();
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -137,13 +226,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await createManagementProfile(userId, email, profileData as ManagementRegistrationData);
       }
 
+      setUser(userCredential.user);
       setUserType(userType);
+      saveSessionData(userId, userType);
       
       // Fetch the newly created profile
       await fetchUserProfile(userId, userType);
     } catch (error) {
       // If Firestore operations fail, delete the Auth user
       await userCredential.user.delete();
+      clearSessionData();
       throw error;
     } finally {
       setLoading(false);
@@ -151,9 +243,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    await signOut(auth);
+    // Clear session data first
+    clearSessionData();
+    
+    // Clear local state
+    setUser(null);
     setUserType(null);
     setUserProfile(null);
+    
+    // DO NOT call signOut(auth) - it would log out all tabs
+    // Instead, just clear this tab's session and state
+    // The user remains authenticated in Firebase, but this tab is "logged out"
   };
 
   const value = {

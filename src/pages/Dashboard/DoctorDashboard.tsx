@@ -262,7 +262,7 @@ const DoctorDashboard: React.FC = () => {
         <div className="header-left">
           <h1>Doctor Dashboard</h1>
           <span className="user-type-badge" style={{ backgroundColor: '#4CAF50' }}>
-            👨‍⚕️ Doctor
+            <i className="fas fa-user-md"></i> Doctor
           </span>
         </div>
         <button className="logout-button" onClick={handleLogout}>
@@ -272,7 +272,7 @@ const DoctorDashboard: React.FC = () => {
       
       <div className="dashboard-content">
         <div className="welcome-card">
-          <h2>Welcome, Dr. {profile?.name || 'Doctor'}!</h2>
+          <h2>Welcome, {profile?.name || 'Doctor'}!</h2>
           <p>Manage your appointments and patient consultations.</p>
         </div>
 
@@ -352,9 +352,10 @@ const DoctorDashboard: React.FC = () => {
                         display: 'flex', 
                         alignItems: 'center', 
                         justifyContent: 'center',
-                        fontSize: '18px'
+                        fontSize: '18px',
+                        color: '#1976d2'
                       }}>
-                        👤
+                        <i className="fas fa-user"></i>
                       </div>
                       <div>
                         <h4 style={{ margin: 0, color: '#1976d2', fontSize: '16px', fontWeight: '600' }}>
@@ -400,7 +401,11 @@ const DoctorDashboard: React.FC = () => {
                           border: `1px solid ${appointment.paymentStatus === 'pending' ? '#ffeaa7' : '#c3e6cb'}`
                         }}
                       >
-                        {appointment.paymentStatus === 'pending' ? '⏳ Payment Pending' : '✓ Paid'}
+                        {appointment.paymentStatus === 'pending' ? (
+                          <><i className="fas fa-clock"></i> Payment Pending</>
+                        ) : (
+                          <><i className="fas fa-check-circle"></i> Paid</>
+                        )}
                       </span>
                       <span style={{ color: '#1976d2', fontWeight: 'bold', fontSize: '16px' }}>
                         ₹{appointment.amount}
@@ -412,13 +417,63 @@ const DoctorDashboard: React.FC = () => {
                     marginTop: '12px', 
                     paddingTop: '12px', 
                     borderTop: '1px solid #e0e0e0',
-                    fontSize: '13px',
-                    color: '#1976d2',
-                    fontWeight: '600',
-                    textAlign: 'center'
+                    display: 'flex',
+                    gap: '8px'
                   }}>
-                    <i className="fas fa-prescription" style={{ marginRight: '6px' }}></i>
-                    Click to create prescription
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinCall(appointment.id);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        backgroundColor: '#4caf50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4caf50'}
+                    >
+                      <i className="fas fa-video"></i>
+                      Join Video Call
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAppointmentClick(appointment);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        backgroundColor: '#1976d2',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1565c0'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1976d2'}
+                    >
+                      <i className="fas fa-prescription"></i>
+                      Prescription
+                    </button>
                   </div>
                 </div>
               ))}
@@ -484,7 +539,32 @@ const DoctorDashboard: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJoinCall(appointment.id);
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#4caf50',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4caf50'}
+                        >
+                          <i className="fas fa-video"></i>
+                          Join
+                        </button>
                         <span 
                           style={{
                             padding: '4px 10px',
@@ -578,16 +658,232 @@ const DoctorDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions Info */}
+        {/* Quick Actions Section */}
         <div className="info-card" style={{ marginTop: '20px' }}>
           <h3>Quick Actions</h3>
-          <p>Manage your medical practice efficiently with these features:</p>
-          <ul style={{ marginTop: '15px', paddingLeft: '20px', color: '#666' }}>
-            <li><strong>My Patients</strong>: View and manage your patient list with complete medical histories.</li>
-            <li><strong>Appointments</strong>: Review today's appointments and upcoming consultations.</li>
-            <li><strong>Prescriptions</strong>: Create and manage patient prescriptions digitally.</li>
-            <li><strong>Analytics</strong>: Track your performance metrics and patient outcomes.</li>
-          </ul>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px', marginTop: '15px' }}>
+            
+            {/* My Patients Card */}
+            <div 
+              onClick={() => handleNavigate('/doctor/patients')}
+              style={{
+                padding: '20px',
+                borderRadius: '12px',
+                backgroundColor: '#e8f5e9',
+                border: '2px solid #4caf50',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.15)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(76, 175, 80, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(76, 175, 80, 0.15)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '50%', 
+                  backgroundColor: '#4caf50', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  color: 'white'
+                }}>
+                  <i className="fas fa-users"></i>
+                </div>
+                <h4 style={{ margin: 0, color: '#2e7d32', fontSize: '18px', fontWeight: '600' }}>
+                  My Patients
+                </h4>
+              </div>
+              <p style={{ margin: 0, color: '#666', fontSize: '14px', lineHeight: '1.6' }}>
+                View patient medical records, diagnosis history, and health information
+              </p>
+            </div>
+
+            {/* Cancer Classification Card */}
+            <div 
+              onClick={() => handleNavigate('/classification')}
+              style={{
+                padding: '20px',
+                borderRadius: '12px',
+                backgroundColor: '#fff3e0',
+                border: '2px solid #ff9800',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                boxShadow: '0 2px 8px rgba(255, 152, 0, 0.15)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 152, 0, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.15)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '50%', 
+                  backgroundColor: '#ff9800', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  color: 'white'
+                }}>
+                  <i className="fas fa-microscope"></i>
+                </div>
+                <h4 style={{ margin: 0, color: '#e65100', fontSize: '18px', fontWeight: '600' }}>
+                  Cancer Classification
+                </h4>
+              </div>
+              <p style={{ margin: 0, color: '#666', fontSize: '14px', lineHeight: '1.6' }}>
+                Upload medical images for AI-powered cancer detection (Brain, Lung, Skin)
+              </p>
+              <div style={{ 
+                marginTop: '12px', 
+                color: '#ff9800', 
+                fontSize: '13px', 
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span>Start Analysis</span>
+                <i className="fas fa-arrow-right"></i>
+              </div>
+            </div>
+
+            {/* Classification History Card */}
+            <div 
+              onClick={() => handleNavigate('/classification-history')}
+              style={{
+                padding: '20px',
+                borderRadius: '12px',
+                backgroundColor: '#e8eaf6',
+                border: '2px solid #3f51b5',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                boxShadow: '0 2px 8px rgba(63, 81, 181, 0.15)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(63, 81, 181, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(63, 81, 181, 0.15)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '50%', 
+                  backgroundColor: '#3f51b5', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  color: 'white'
+                }}>
+                  <i className="fas fa-history"></i>
+                </div>
+                <h4 style={{ margin: 0, color: '#1a237e', fontSize: '18px', fontWeight: '600' }}>
+                  Classification History
+                </h4>
+              </div>
+              <p style={{ margin: 0, color: '#666', fontSize: '14px', lineHeight: '1.6' }}>
+                View past classification results and patient analysis history
+              </p>
+              <div style={{ 
+                marginTop: '12px', 
+                color: '#3f51b5', 
+                fontSize: '13px', 
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span>View History</span>
+                <i className="fas fa-arrow-right"></i>
+              </div>
+            </div>
+
+            {/* Prescription History Card */}
+            <div 
+              onClick={() => handleNavigate('/doctor/prescription-history')}
+              style={{
+                padding: '20px',
+                borderRadius: '12px',
+                backgroundColor: '#e1f5fe',
+                border: '2px solid #0288d1',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                boxShadow: '0 2px 8px rgba(2, 136, 209, 0.15)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(2, 136, 209, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(2, 136, 209, 0.15)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '50%', 
+                  backgroundColor: '#0288d1', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  color: 'white'
+                }}>
+                  <i className="fas fa-file-medical"></i>
+                </div>
+                <h4 style={{ margin: 0, color: '#01579b', fontSize: '18px', fontWeight: '600' }}>
+                  Prescription History
+                </h4>
+              </div>
+              <p style={{ margin: 0, color: '#666', fontSize: '14px', lineHeight: '1.6' }}>
+                View all prescriptions you've written for your patients
+              </p>
+              <div style={{ 
+                marginTop: '12px', 
+                color: '#0288d1', 
+                fontSize: '13px', 
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span>View Prescriptions</span>
+                <i className="fas fa-arrow-right"></i>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e0e0e0' }}>
+            <p style={{ color: '#666', fontSize: '14px', marginBottom: '10px' }}>Other Features:</p>
+            <ul style={{ paddingLeft: '20px', color: '#666', fontSize: '14px' }}>
+              <li><strong>My Patients</strong>: View and manage your patient list with complete medical histories.</li>
+              <li><strong>Appointments</strong>: Review today's appointments and upcoming consultations.</li>
+              <li><strong>Prescriptions</strong>: Create and manage patient prescriptions digitally.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

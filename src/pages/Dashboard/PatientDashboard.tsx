@@ -104,7 +104,7 @@ const PatientDashboard: React.FC = () => {
             setDoctors(updatedDoctors);
 
             // Show success message
-            alert('🎉 Appointment booked successfully! You can view it in "My Appointments" section.');
+            alert('✓ Appointment booked successfully! You can view it in "My Appointments" section.');
           } catch (error) {
             console.error('Error updating appointment:', error);
             alert('Payment successful but failed to update appointment. Please contact support.');
@@ -140,15 +140,20 @@ const PatientDashboard: React.FC = () => {
         <div className="header-left">
           <h1>Patient Dashboard</h1>
           <span className="user-type-badge">
-            🏥 Patient
+            <i className="fas fa-user-injured"></i> Patient
           </span>
         </div>
         <div className="header-actions">
+      
+            
           <button className="appointments-button" onClick={() => navigate('/booked-appointments')}>
-            📅 My Appointments
+            <i className="fas fa-calendar-check"></i> My Appointments
+          </button>
+          <button className="appointments-button" onClick={() => navigate('/patient/prescriptions')}>
+            <i className="fas fa-file-medical"></i> My Prescriptions
           </button>
           <button className="logout-button" onClick={handleLogout}>
-            Logout
+            <i className="fas fa-sign-out-alt"></i> Logout
           </button>
         </div>
       </div>
@@ -170,10 +175,10 @@ const PatientDashboard: React.FC = () => {
                 <div key={doctor.id} className="doctor-card">
                   <div className="doctor-header">
                     <img 
-                      src={doctor.imageUrl || 'https://via.placeholder.com/100'} 
-                      alt={doctor.name}
-                      className="doctor-image"
-                    />
+  src="./placeholder.jpg"
+  alt={doctor.name}
+  className="doctor-image"
+/>
                     <div className="doctor-info">
                       <h4>{doctor.name}</h4>
                       <p className="specialization">{doctor.specialization}</p>

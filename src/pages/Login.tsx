@@ -79,22 +79,22 @@ const Login: React.FC = () => {
     <div className="login-container">
       <div className="login-brand">
         <div className="brand-content">
-          <h1 className="brand-title">Welcome Back</h1>
+          <h1 className="brand-title">OncoGenesis</h1>
           <p className="brand-description">
-            Sign in to access your dashboard and manage your account with ease.
+            Your Partner in Smarter Care 
           </p>
           <div className="brand-features">
             <div className="feature-item">
-              <span className="feature-icon">🔒</span>
-              <span>Secure Authentication</span>
+              <span className="feature-icon"></span>
+              <span>Smart Patient Management</span>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">⚡</span>
-              <span>Fast & Reliable</span>
+              <span className="feature-icon"></span>
+              <span>AI-Assisted Diagnosis</span>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🎨</span>
-              <span>Modern Interface</span>
+              <span className="feature-icon"></span>
+              <span>Automated Workflows</span>
             </div>
           </div>
         </div>
@@ -118,14 +118,14 @@ const Login: React.FC = () => {
                   className={`type-button ${userType === 'patient' ? 'active' : ''}`}
                   onClick={() => { setUserType('patient'); resetForm(); }}
                 >
-                  🏥 Patient
+                   Patient
                 </button>
                 <button
                   type="button"
                   className={`type-button ${userType === 'doctor' ? 'active' : ''}`}
                   onClick={() => { setUserType('doctor'); resetForm(); }}
                 >
-                  👨‍⚕️ Doctor
+                   Doctor
                 </button>
               </div>
             </div>

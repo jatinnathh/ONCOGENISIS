@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import PrescriptionSystem from './DoctorCreatePrescription';
+import PrescriptionSystemEnhanced from './DoctorCreatePrescriptionEnhanced';
 
 export default function PrescriptionPage() {
   const location = useLocation();
@@ -13,7 +13,7 @@ export default function PrescriptionPage() {
   useEffect(() => {
     if (!patient) {
       console.warn('No patient data received. Redirecting to dashboard...');
-      navigate('/doctor/dashboard', { replace: true });
+      navigate('/doctor-dashboard', { replace: true });
     }
   }, [patient, navigate]);
 
@@ -31,7 +31,7 @@ export default function PrescriptionPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PrescriptionSystem key={patient.id} patientData={patient} />
+      <PrescriptionSystemEnhanced key={patient.id} patientData={patient} />
     </div>
   );
 }

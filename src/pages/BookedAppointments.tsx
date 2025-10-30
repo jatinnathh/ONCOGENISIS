@@ -36,6 +36,10 @@ const BookedAppointments: React.FC = () => {
     navigate(`/video-call/${appointmentId}`);
   };
 
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'scheduled': return '#00a699';
@@ -65,8 +69,8 @@ const BookedAppointments: React.FC = () => {
   return (
     <div className="booked-appointments-container">
       <div className="appointments-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
+        <button className="back-button" onClick={handleBackToDashboard}>
+          <i className="fas fa-arrow-left"></i> Back to Dashboard
         </button>
         <h1>My Appointments</h1>
         <p className="subtitle">View and manage your booked appointments</p>
@@ -75,11 +79,13 @@ const BookedAppointments: React.FC = () => {
       <div className="appointments-content">
         {appointments.length === 0 ? (
           <div className="no-appointments">
-            <div className="no-appointments-icon">📅</div>
+            <div className="no-appointments-icon">
+              <i className="fas fa-calendar-times"></i>
+            </div>
             <h3>No Appointments Yet</h3>
             <p>You haven't booked any appointments. Visit the dashboard to book one!</p>
-            <button className="primary-button" onClick={() => navigate('/dashboard')}>
-              Book an Appointment
+            <button className="primary-button" onClick={handleBackToDashboard}>
+              <i className="fas fa-plus-circle"></i> Book an Appointment
             </button>
           </div>
         ) : (
@@ -109,20 +115,28 @@ const BookedAppointments: React.FC = () => {
 
                 <div className="appointment-details">
                   <div className="detail-row">
-                    <span className="detail-label">⏰ Time Slot:</span>
+                    <span className="detail-label">
+                      <i className="fas fa-clock"></i> Time Slot:
+                    </span>
                     <span className="detail-value">{appointment.timeSlot}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="detail-label">💰 Amount:</span>
+                    <span className="detail-label">
+                      <i className="fas fa-rupee-sign"></i> Amount:
+                    </span>
                     <span className="detail-value">₹{appointment.amount}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="detail-label">📧 Doctor Email:</span>
+                    <span className="detail-label">
+                      <i className="fas fa-envelope"></i> Doctor Email:
+                    </span>
                     <span className="detail-value">{appointment.doctorEmail}</span>
                   </div>
                   {appointment.razorpayPaymentId && (
                     <div className="detail-row">
-                      <span className="detail-label">💳 Payment ID:</span>
+                      <span className="detail-label">
+                        <i className="fas fa-credit-card"></i> Payment ID:
+                      </span>
                       <span className="detail-value payment-id">{appointment.razorpayPaymentId}</span>
                     </div>
                   )}
@@ -133,15 +147,31 @@ const BookedAppointments: React.FC = () => {
                     className="secondary-button"
                     onClick={() => handleViewDetails(appointment.id)}
                   >
-                    View Details
+                    <i className="fas fa-info-circle"></i> View Details
                   </button>
-                  {appointment.paymentStatus === 'completed' && (
+                  {appointment.status === 'scheduled' && appointment.paymentStatus === 'completed' && (
                     <button 
-                      className="primary-button"
+                      className="primary-button video-call-button"
                       onClick={() => handleJoinCall(appointment.id)}
+                      style={{
+                        backgroundColor: '#4caf50',
+                        borderColor: '#4caf50'
+                      }}
                     >
-                      Join Video Call
+                      <i className="fas fa-video"></i> Join Video Call
                     </button>
+                  )}
+                  {appointment.paymentStatus !== 'completed' && (
+                    <div className="payment-pending-notice" style={{
+                      padding: '8px 12px',
+                      backgroundColor: '#fff3cd',
+                      color: '#856404',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      textAlign: 'center'
+                    }}>
+                      <i className="fas fa-info-circle"></i> Complete payment to join video call
+                    </div>
                   )}
                 </div>
               </div>

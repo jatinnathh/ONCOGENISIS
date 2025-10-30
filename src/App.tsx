@@ -8,6 +8,11 @@ import BookedAppointments from './pages/BookedAppointments';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardRedirect from './components/DashboardRedirect';
 import PrescriptionPage from './pages/Prescription/DoctorPrescriptionPage';
+import CancerClassification from './pages/CancerClassification/CancerClassification';
+import ClassificationHistory from './pages/ClassificationHistory/ClassificationHistory';
+import PatientRecordViewer from './pages/PatientRecords/PatientRecordViewer';
+import PatientPrescriptionViewer from './pages/Prescription/PatientPrescriptionViewer';
+import DoctorPrescriptionHistory from './pages/Prescription/DoctorPrescriptionHistory';
 import './App.css';
 function App() {
   return (
@@ -73,6 +78,56 @@ function App() {
             </PrivateRoute>
           }
           ></Route>
+
+          {/* Cancer Classification */}
+          <Route
+            path="/classification"
+            element={
+              <PrivateRoute>
+                <CancerClassification />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Classification History */}
+          <Route
+            path="/classification-history"
+            element={
+              <PrivateRoute>
+                <ClassificationHistory />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Patient Records Viewer */}
+          <Route
+            path="/doctor/patients"
+            element={
+              <PrivateRoute>
+                <PatientRecordViewer />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Patient Prescription Viewer */}
+          <Route
+            path="/patient/prescriptions"
+            element={
+              <PrivateRoute>
+                <PatientPrescriptionViewer />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Doctor Prescription History */}
+          <Route
+            path="/doctor/prescription-history"
+            element={
+              <PrivateRoute>
+                <DoctorPrescriptionHistory />
+              </PrivateRoute>
+            }
+          />
           
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
