@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getPatientBookedAppointments } from '../services/appointmentService';
-import type { Appointment } from '../types';
 import './BookedAppointments.css';
 
 const BookedAppointments: React.FC = () => {

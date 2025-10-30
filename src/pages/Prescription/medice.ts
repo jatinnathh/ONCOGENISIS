@@ -21,4 +21,8 @@ const MEDICINES = [
   { id: 20, name: 'Filgrastim (Neupogen)', category: 'Supportive Care' }
 ];
 
+<<<<<<< HEAD
 export default MEDICINES;
+=======
+export default MEDICINES;
+>>>>>>> cbb802d4fb004840f1e635aefb7af1ce05790690

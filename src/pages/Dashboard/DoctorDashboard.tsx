@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserProfile } from '../../services/userService';
 import { db } from '../../services/firebase';
-import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import type { Doctor } from '../../types';
 import './Dashboard.css';
 import { getDoctorAppointments } from '../../services/appointmentService';
