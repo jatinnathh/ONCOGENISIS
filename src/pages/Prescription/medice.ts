@@ -21,5 +21,4 @@ const MEDICINES = [
   { id: 20, name: 'Filgrastim (Neupogen)', category: 'Supportive Care' }
 ];
 
-
-cexport MEDICINES
+export default MEDICINES;
